@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017 Morwenn
+ * Copyright (c) 2015-2019 Morwenn
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,7 @@ namespace detail
     template<typename Number>
     constexpr auto abs(Number x)
         -> std::enable_if_t<
-            not std::is_unsigned<Number>::value,
+            !std::is_unsigned<Number>::value,
             Number
         >
     {
@@ -181,9 +181,10 @@ namespace detail
             bool
         >
     {
+        // https://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
         return smath::detail::abs(a - b) <=
-            std::numeric_limits<lesser_of<T, U>>::epsilon() *
-            max(smath::detail::abs(a), smath::detail::abs(b));
+            std::numeric_limits<lesser_of<T, U>>::epsilon() * smath::detail::abs(a + b)
+            || smath::detail::abs(a - b) < std::numeric_limits<lesser_of<T, U>>::min();
     }
 
     template<typename T, typename U>
@@ -205,9 +206,9 @@ namespace detail
     {
 #ifndef STATIC_MATH_NO_INTEGRAL_CONSTANT
         using namespace constant_literals;
-        return not (n % 2_c);
+        return !(n % 2_c);
 #else
-        return not (n % 2);
+        return !(n % 2);
 #endif
     }
 
@@ -215,7 +216,7 @@ namespace detail
     constexpr auto is_odd(Integer n)
         -> decltype(auto)
     {
-        return not detail::is_even(n);
+        return !detail::is_even(n);
     }
 
     ////////////////////////////////////////////////////////////
